@@ -90,16 +90,16 @@ export const networkConfig = {
   host: REACT_APP_NETWORK_NAME,
   chainId: REACT_APP_CHAIN_ID,
   networkName:
-    REACT_APP_EMBED_BUILD_ENV === "productiona"
+    REACT_APP_EMBED_BUILD_ENV === "production"
       ? "Polygon"
       : REACT_APP_NETWORK_NAME,
   blockExplorer: "",
   ticker:
-    REACT_APP_EMBED_BUILD_ENV === "productiona"
+    REACT_APP_EMBED_BUILD_ENV === "production"
       ? "MATIC"
       : REACT_APP_NETWORK_NAME,
   tickerName:
-    REACT_APP_EMBED_BUILD_ENV === "productiona"
+    REACT_APP_EMBED_BUILD_ENV === "production"
       ? "MATIC"
       : REACT_APP_NETWORK_NAME,
   rpcUrl: REACT_APP_POLYGON_PROVIDER,
