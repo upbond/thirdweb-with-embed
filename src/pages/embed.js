@@ -12,6 +12,7 @@ const Embed = () => {
   const [balance, setBalance] = useState(0);
   const [address, setAddress] = useState("");
   const [quantity, setQuantity] = useState(0);
+  const [symbol, setSymbol] = useState("");
   const web3 = new Web3();
 
   useEffect(() => {
@@ -23,7 +24,6 @@ const Embed = () => {
   const init = async () => {
     try {
       if (upbondProviders) {
-        console.log(upbondProviders, 18);
         const provider = new ethers.providers.Web3Provider(
           upbondProviders.provider
         );
@@ -43,8 +43,8 @@ const Embed = () => {
 
   const transfer = async () => {
     try {
-      const res = await contract.erc20.mintTo(address, quantity);
-      console.log(res, "@37");
+      const res = await contract.erc20.transfer(address, quantity);
+      alert('txHash:' + res.receipt.transactionHash);
     } catch (error) {
       console.log(error, "@39");
     }
@@ -53,8 +53,10 @@ const Embed = () => {
   const getBalance = async () => {
     try {
       const res = await contract.erc20.balance();
-      setBalance(web3.utils.fromWei(res));
-      console.log(res, "@46");
+      setSymbol(res.symbol);
+      setBalance(
+        web3.utils.fromWei(web3.utils.hexToNumberString(res.value._hex))
+      );
     } catch (error) {
       console.log(error, "@48");
     }
@@ -73,16 +75,12 @@ const Embed = () => {
       {account ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "90px" }}>
           <div>
-            <label htmlFor="address">
-              User Address
-            </label>
-            <br/>
+            <label htmlFor="address">User Address</label>
+            <br />
             <span>{account}</span>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <label htmlFor="address">
-              Address
-            </label>
+            <label htmlFor="address">Address</label>
             <input
               onChange={(e) => setAddress(e.target.value)}
               type="text"
@@ -90,9 +88,7 @@ const Embed = () => {
               placeholder="addressTo"
             />
             <br />
-            <label htmlFor="quantity">
-              Quantity
-            </label>
+            <label htmlFor="quantity">Quantity</label>
             <input
               onChange={(e) => setQuantity(e.target.value)}
               type="text"
@@ -109,9 +105,7 @@ const Embed = () => {
             </button>
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
-            <label htmlFor="balance">
-              Balance
-            </label>
+            <label htmlFor="balance">Balance</label>
             <button
               onClick={() => {
                 getBalance();
@@ -121,7 +115,7 @@ const Embed = () => {
             </button>
             {balance && (
               <span style={{ fontSize: "24px" }}>
-                {balance} ETH
+                {balance} {symbol}
               </span>
             )}
           </div>
