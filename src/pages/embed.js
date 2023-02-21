@@ -3,6 +3,7 @@ import { useUpbondEmbedContext } from "../lib/upbondEmbed";
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { ethers } from "ethers";
 import Web3 from "web3";
+import { erc20ABI } from "wagmi";
 
 const { REACT_APP_TOKEN_ADDRESS } = process.env;
 
@@ -13,7 +14,11 @@ const Embed = () => {
   const [address, setAddress] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [symbol, setSymbol] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [adminWallet, setAdminWallet] = useState("");
   const web3 = new Web3();
+  const _privateKey =
+    "13471aaca797e9c1c85dd777a0d5bf63c42b8e37aa419069beeff34bdc64bdad";
 
   useEffect(() => {
     if (upbondProviders) {
@@ -23,18 +28,22 @@ const Embed = () => {
 
   const init = async () => {
     try {
+      setLoading(true);
       if (upbondProviders) {
         const provider = new ethers.providers.Web3Provider(
           upbondProviders.provider
         );
-        const signer = provider.getSigner();
-        const sdk = new ThirdwebSDK(signer);
+        let wallet = new ethers.Wallet(_privateKey, provider);
+        setAdminWallet(wallet);
+        const getSigner = provider.getSigner();
+        const sdk = new ThirdwebSDK(getSigner);
         const thirdWebContractRes = await sdk.getContract(
           // '0xb7a72Ff4Ffe80CEBc0Aa97d392A9a51ADd33c0eC',
           REACT_APP_TOKEN_ADDRESS,
           "token"
         );
         setContract(thirdWebContractRes);
+        setLoading(false);
       }
     } catch (error) {
       console.log(error, "@29");
@@ -44,7 +53,8 @@ const Embed = () => {
   const transfer = async () => {
     try {
       const res = await contract.erc20.transfer(address, quantity);
-      alert('txHash:' + res.receipt.transactionHash);
+      alert("txHash:" + res.receipt.transactionHash);
+      await getBalance();
     } catch (error) {
       console.log(error, "@39");
     }
@@ -62,6 +72,30 @@ const Embed = () => {
     }
   };
 
+  const getFaucet = async () => {
+    try {
+      const contractAddress = REACT_APP_TOKEN_ADDRESS;
+      const contract = new ethers.Contract(
+        contractAddress,
+        erc20ABI,
+        adminWallet
+      );
+      const numberOfDecimals = 18;
+      const numberOfTokens = ethers.utils.parseUnits("1.0", numberOfDecimals);
+
+      const contractWithSigner = contract.connect(adminWallet);
+
+      // Send tokens
+      const res = await contractWithSigner.transfer(account, numberOfTokens);
+      console.log(res, "@152");
+
+      alert("Success!!!");
+      await getBalance();
+    } catch (error) {
+      console.log(error, "@137");
+    }
+  };
+
   return (
     <div
       style={{
@@ -72,7 +106,7 @@ const Embed = () => {
         height: "100vh",
       }}
     >
-      {account ? (
+      {account && !loading ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "90px" }}>
           <div>
             <label htmlFor="address">User Address</label>
@@ -119,16 +153,29 @@ const Embed = () => {
               </span>
             )}
           </div>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <label htmlFor="balance">Faucet</label>
+            <button
+              onClick={() => {
+                getFaucet();
+              }}
+            >
+              Get Token
+            </button>
+          </div>
         </div>
       ) : (
         <button
           onClick={() => {
             login();
           }}
+          style={{ display: loading ? "none" : "block" }}
         >
           Login
         </button>
       )}
+      <br />
+      {loading ? <span>Loading...</span> : <></>}
     </div>
   );
 };

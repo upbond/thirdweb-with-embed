@@ -5,9 +5,7 @@ import {
   networkConfig,
   walletThemeConfig,
 } from "../config/loginConfig";
-// import { ethers } from "ethers";
 import { createContext, useContext, useEffect, useState } from "react";
-// import { delayTime } from "utils/time";
 import Web3 from "web3";
 
 export const EmbedContext = createContext({
@@ -67,29 +65,30 @@ export const UpbondEmbedContext = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    /**
-     * Fetch()
-     * fetch user info from auth after upbond provider status is loggedin
-     * fetch user address from upbond provider
-     */
-    const fetch = async () => {
-      setIsLoading(true);
-      if (upbondProviders && upbondProviders?.isLoggedIn) {
-        const user = await upbondProviders.getUserInfo(); //get user info from auth
-        if (user) {
-          const web3 = new Web3(upbondProviders); // set upbond provider to web3 provider
-          web3.setProvider(upbondProviders.provider);
-          setWeb3(web3);
-          const account = await web3.eth.getAccounts(); //get wallet address from upbond provider
-          setAccount(account[0]);
-          setIsLoading(false);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    };
     fetch();
   }, [upbondProviders]);
+
+  /**
+   * Fetch()
+   * fetch user info from auth after upbond provider status is loggedin
+   * fetch user address from upbond provider
+   */
+  const fetch = async () => {
+    setIsLoading(true);
+    if (upbondProviders && upbondProviders?.isLoggedIn) {
+      const user = await upbondProviders.getUserInfo(); //get user info from auth
+      if (user) {
+        const web3 = new Web3(upbondProviders); // set upbond provider to web3 provider
+        web3.setProvider(upbondProviders.provider);
+        setWeb3(web3);
+        const account = await web3.eth.getAccounts(); //get wallet address from upbond provider
+        setAccount(account[0]);
+        setIsLoading(false);
+      }
+    } else {
+      setIsLoading(false);
+    }
+  };
 
   /**
    * init()
@@ -131,6 +130,8 @@ export const UpbondEmbedContext = ({ children }) => {
         const accounts = await this.web3.eth.getAccounts();
         setAccount(accounts);
         return data;
+      } else {
+        fetch();
       }
     } catch (e) {
       throw new Error(e);
@@ -139,7 +140,7 @@ export const UpbondEmbedContext = ({ children }) => {
 
   const contextProvider = {
     upbondProviders,
-    isLoading, 
+    isLoading,
     account,
     login,
     init,
