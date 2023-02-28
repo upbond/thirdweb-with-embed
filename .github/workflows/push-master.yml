@@ -30,7 +30,6 @@ jobs:
           REACT_APP_LINE_CLIENTID: "wa3wjaB0dx0RO9AgzngM-"
           REACT_APP_POLYGON_PROVIDER: "https://polygon-mumbai.infura.io/v3/74a97bae118345ecbadadaaeb1cf4a53"
           REACT_APP_NETWORK_NAME: "mumbai"
-          REACT_APP_CLIENT_ID: "BKmNTSQ7y8yWyhNT_W5BobaAu7Re-zLW6fzK0bzdvjP9a-G4OP8ajriQJHFOH3ypvRIJeEp_O40aag-7iNTyp-s"
           REACT_APP_CHAIN_ID: "80001"
           REACT_APP_GOOGLE_CLIENT_ID: "hxFv4SaQVXv3tE_rhe5u9"
           REACT_APP_TOKEN_ADDRESS: "0xf66bC1C717D7e852F427d599829083A4b7928023"

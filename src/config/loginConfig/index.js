@@ -13,13 +13,12 @@ const {
   REACT_APP_LINE_CLIENTID,
   REACT_APP_POLYGON_PROVIDER,
   REACT_APP_NETWORK_NAME,
-  REACT_APP_CLIENT_ID,
   REACT_APP_CHAIN_ID,
   REACT_APP_GOOGLE_CLIENT_ID,
 } = process.env;
 
 export const lineLoginConfig = {
-  name: "LINE アカウント", //button login title
+  name: "LINE", //button login title
   description: "LINE with UPBOND Identity",
   typeOfLogin: "line",
   loginProvider: "upbond-line",
@@ -42,7 +41,7 @@ export const lineLoginConfig = {
 };
 
 export const googleLoginConfig = {
-  name: "Google アカウント",
+  name: "Google",
   description: "Google",
   typeOfLogin: "jwt",
   loginProvider: "upbond-google",
@@ -53,7 +52,7 @@ export const googleLoginConfig = {
     clientId: REACT_APP_GOOGLE_CLIENT_ID,
     scope: "openid email profile offline_access",
   },
-  clientId: REACT_APP_CLIENT_ID,
+  clientId: REACT_APP_GOOGLE_CLIENT_ID,
   showOnModal: true,
   showOnDesktop: true,
   showOnMobile: true,
