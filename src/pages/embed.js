@@ -5,17 +5,20 @@ import { ethers } from "ethers";
 import Web3 from "web3";
 import { erc20ABI } from "wagmi";
 
-const { REACT_APP_TOKEN_ADDRESS } = process.env;
+const { REACT_APP_TOKEN_ADDRESS, REACT_APP_MARKETPLACE_ADDRESS } = process.env;
 
 const Embed = () => {
   const { login, account, upbondProviders } = useUpbondEmbedContext();
   const [contract, setContract] = useState();
+  const [mContract, setMContract] = useState();
   const [balance, setBalance] = useState(0);
   const [address, setAddress] = useState("");
   const [quantity, setQuantity] = useState(0);
   const [symbol, setSymbol] = useState("");
   const [loading, setLoading] = useState(false);
   const [adminWallet, setAdminWallet] = useState("");
+  const [listing, setListing] = useState();
+  const [arrQty, setArrQty] = useState({});
   const web3 = new Web3();
   const _privateKey =
     "13471aaca797e9c1c85dd777a0d5bf63c42b8e37aa419069beeff34bdc64bdad";
@@ -44,10 +47,23 @@ const Embed = () => {
         );
         setContract(thirdWebContractRes);
         setLoading(false);
+
+        const marketplaceContractRes = await sdk.getContract(
+          REACT_APP_MARKETPLACE_ADDRESS,
+          "marketplace"
+        );
+
+        setMContract(marketplaceContractRes);
+        await getNftListings(marketplaceContractRes);
       }
     } catch (error) {
       console.log(error, "@29");
     }
+  };
+
+  const getNftListings = async (contract = mContract) => {
+    const list = await contract.getAll();
+    setListing(list);
   };
 
   const transfer = async () => {
@@ -82,17 +98,26 @@ const Embed = () => {
       );
       const numberOfDecimals = 18;
       const numberOfTokens = ethers.utils.parseUnits("1.0", numberOfDecimals);
-
       const contractWithSigner = contract.connect(adminWallet);
 
       // Send tokens
       const res = await contractWithSigner.transfer(account, numberOfTokens);
-      console.log(res, "@152");
 
       alert("Success!!!");
       await getBalance();
     } catch (error) {
       console.log(error, "@137");
+    }
+  };
+
+  const buyNft = async (id) => {
+    try {
+      const res = await mContract.buyoutListing(id, arrQty[id]);
+      await getNftListings();
+      alert("success buy this nft", res.receipt.transactionHash );
+    } catch (error) {
+      console.log(error, "@117");
+      alert("Error");
     }
   };
 
@@ -103,7 +128,6 @@ const Embed = () => {
         width: "100%",
         justifyContent: "center",
         alignItems: "center",
-        height: "100vh",
       }}
     >
       {account && !loading ? (
@@ -162,6 +186,86 @@ const Embed = () => {
             >
               Get Token
             </button>
+          </div>
+          <div
+            style={{
+              padding: "3rem",
+              // width: "100%",
+              display: "flex",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              backgroundColor: "white",
+              borderRadius: "30px",
+            }}
+          >
+            {listing &&
+              listing.map((item) => {
+                return (
+                  <div
+                    style={{
+                      width: "25%",
+                      margin: "1rem",
+                      display: "flex",
+                      padding: "1rem",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                    }}
+                  >
+                    <img
+                      src={item.asset.image}
+                      style={{ width: "100%", height: "300px" }}
+                      alt=""
+                      srcset=""
+                    />
+                    <span style={{ color: "black", textAlign: "center" }}>
+                      {item.asset.name}
+                    </span>
+                    <br />
+                    <span style={{ color: "black", textAlign: "center" }}>
+                      {item.buyoutCurrencyValuePerToken.displayValue}{" "}
+                      {item.buyoutCurrencyValuePerToken.name}
+                    </span>
+                    <br />
+                    <input
+                      type="number"
+                      name={item.asset.name}
+                      id={item.id}
+                      min="0"
+                      max={item.quantity.toString()}
+                      defaultValue="0"
+                      onChange={(e) => {
+                        if (arrQty[item.id] !== undefined) {
+                          const newArr = arrQty;
+                          newArr[item.id] = e.target.value;
+                          setArrQty(newArr);
+                          return;
+                        }
+                        setArrQty({ ...arrQty, [item.id]: e.target.value });
+                      }}
+                    />
+                    <br />
+                    <button
+                      onClick={() => {
+                        if (arrQty[item.id] > 0) buyNft(item.id);
+                      }}
+                      style={{
+                        backgroundColor: Number(item.quantity.toString())
+                          ? "blue"
+                          : "gray",
+                        textAlign: "center",
+                        color: "white",
+                        borderRadius: "10px",
+                        border: "none",
+                        padding: "1rem",
+                        cursor: "pointer",
+                      }}
+                      disabled={!Number(item.quantity.toString())}
+                    >
+                      {Number(item.quantity.toString()) ? "Buy" : "Sold Out"}
+                    </button>
+                  </div>
+                );
+              })}
           </div>
         </div>
       ) : (
