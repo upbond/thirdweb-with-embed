@@ -114,7 +114,7 @@ const Embed = () => {
     try {
       const res = await mContract.buyoutListing(id, arrQty[id]);
       await getNftListings();
-      alert("success buy this nft", res.receipt.transactionHash );
+      alert("success buy this nft", res.receipt.transactionHash);
     } catch (error) {
       console.log(error, "@117");
       alert("Error");
@@ -226,6 +226,9 @@ const Embed = () => {
                       {item.buyoutCurrencyValuePerToken.name}
                     </span>
                     <br />
+                    <span style={{ color: "black", textAlign: "center" }}>
+                      Quantity: {item.quantity.toString()}
+                    </span>
                     <input
                       type="number"
                       name={item.asset.name}
